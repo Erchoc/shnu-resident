@@ -50,8 +50,17 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
         return entity;
     }
 
-    public async query(params: any): Promise<T[]> {
+    public async getAll(params: any): Promise<T[]> {
         return await this.repository.find(params);
+    }
+
+    public async query(params: any): Promise<[T[], number]> {
+        let where = {...params}
+        where.skip = null
+        where.take = null
+        where.order = null
+
+        return await this.repository.findAndCount({where:where,skip:params.skip,take:params.take,order:params.order});
     }
 
     public async update(paramId: any, entity: T): Promise<T> {
