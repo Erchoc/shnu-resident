@@ -4,7 +4,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { CrudService } from '../crud-service.interface';
+import { CrudService } from './crud-service.interface';
 
 @Injectable()
 export class CrudTypeOrmService<T> implements CrudService<T> {
@@ -50,8 +50,8 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
         return entity;
     }
 
-    public async getAll(): Promise<T[]> {
-        return await this.repository.find();
+    public async query(params: any): Promise<T[]> {
+        return await this.repository.find(params);
     }
 
     public async update(paramId: any, entity: T): Promise<T> {
