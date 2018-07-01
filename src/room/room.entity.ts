@@ -11,7 +11,7 @@ export class Room {
     @Column('text')
     block: string;
 
-    @ManyToOne(type => Resident)
-    @JoinColumn({ name: 'resident_id' })
+    @ManyToOne(type => Resident, {eager: true})
+    @JoinColumn({ name: 'res_id' })
     resident: Resident;
 }

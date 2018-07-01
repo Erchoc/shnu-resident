@@ -3,7 +3,7 @@ import {
     BadRequestException,
     NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, FindOperator} from 'typeorm';
 import { CrudService } from './crud-service.interface';
 
 @Injectable()
@@ -56,11 +56,38 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
 
     public async query(params: any): Promise<[T[], number]> {
         let where = {...params}
-        where.skip = null
-        where.take = null
-        where.order = null
+        // let relations = []
+        let order = {}
 
-        return await this.repository.findAndCount({where:where,skip:params.skip,take:params.take,order:params.order});
+        delete where.skip
+        delete where.take
+        delete where.order
+
+        for (let key in where) {
+            let val = unescape(where[key]).split('?').join('%').split('*').join('%')
+            if(val.indexOf('_')>-1 || val.indexOf('%')>-1){
+                where[key] = new FindOperator('like',val)
+            }
+            // if(key){
+            //     let arrK=key.split('.')
+            //     if(arrK.length>1){
+            //         let kStr = ''
+            //         for(let i = 0;i<arrK.length-1;i++){
+            //             kStr += arrK[i]
+            //         }
+            //         relations.push(kStr)
+            //     }
+            // }
+        }
+        if(params.order){
+            params.order = params.order.split(',')
+            for(let i = 0 ; i < params.order.length; i+=2){
+                order[params.order[i]]=params.order[i+1].toUpperCase()
+            }
+        }
+
+
+        return await this.repository.findAndCount({where:where,skip:params.skip,take:params.take,order:order});
     }
 
     public async update(paramId: any, entity: T): Promise<T> {
