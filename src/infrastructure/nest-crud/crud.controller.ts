@@ -18,6 +18,11 @@ export class CrudController<T> {
         return await this.crudService.create(entity);
     }
 
+    @Post('batch')
+    public async updateBatch(@Body() entity: T[]): Promise<T> {
+        return await this.crudService.updateBatch(entity);
+    }
+
     @Get('query')
     public async query(@Query() q:any): Promise<any> {
         let res = await this.crudService.query(q);

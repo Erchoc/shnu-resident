@@ -31,19 +31,27 @@ class CrudController {
             return yield this.crudService.create(entity);
         });
     }
+    updateBatch(entity) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.crudService.updateBatch(entity);
+        });
+    }
+    query(q) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let res = yield this.crudService.query(q);
+            let currPage = ~~(q.skip / q.take) + 1;
+            let maxPage = Math.ceil(res[1] / q.take);
+            return { total: res[1], result: res[0], currPage: currPage, maxPage: maxPage };
+        });
+    }
     getOne(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.crudService.getOne(id);
         });
     }
-    getAll() {
+    getAll(q) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.crudService.getAll();
-        });
-    }
-    query() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.crudService.query({});
+            return yield this.crudService.getAll(q);
         });
     }
     update(id, entity) {
@@ -65,6 +73,20 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CrudController.prototype, "create", null);
 __decorate([
+    common_1.Post('batch'),
+    __param(0, common_1.Body()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", Promise)
+], CrudController.prototype, "updateBatch", null);
+__decorate([
+    common_1.Get('query'),
+    __param(0, common_1.Query()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CrudController.prototype, "query", null);
+__decorate([
     common_1.Get(':id'),
     __param(0, common_1.Param('id')),
     __metadata("design:type", Function),
@@ -73,16 +95,11 @@ __decorate([
 ], CrudController.prototype, "getOne", null);
 __decorate([
     common_1.Get(),
+    __param(0, common_1.Query()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CrudController.prototype, "getAll", null);
-__decorate([
-    common_1.Get('query'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], CrudController.prototype, "query", null);
 __decorate([
     common_1.Put(':id'),
     __param(0, common_1.Param('id')), __param(1, common_1.Body()),

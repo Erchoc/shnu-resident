@@ -25,6 +25,7 @@
     "@nestjs/passport": "^1.1.0",
     "@nestjs/swagger": "^2.2.0",
     "@nestjs/typeorm": "^5.0.2",
+    "ejsexcel": "^3.5.2",
     "fastify-formbody": "^2.0.0",
     "jsonwebtoken": "^8.3.0",
     "mysql": "^2.15.0",
@@ -34,7 +35,8 @@
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.0.0",
     "typeorm": "^0.2.7",
-    "typescript": "^2.6.2"
+    "typescript": "^2.6.2",
+    "xlsx": "^0.13.1"
   },
   "devDependencies": {
     "@nestjs/testing": "^5.0.0",

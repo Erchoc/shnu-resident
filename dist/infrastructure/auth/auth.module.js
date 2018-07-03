@@ -10,10 +10,12 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const jwt_strategy_1 = require("./jwt.strategy");
 const auth_controller_1 = require("./auth.controller");
+const consts_module_1 = require("../../consts/consts.module");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
     common_1.Module({
+        imports: [consts_module_1.ConstsModule],
         controllers: [auth_controller_1.AuthController],
         providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy],
     })

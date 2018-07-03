@@ -26,8 +26,8 @@ __decorate([
     __metadata("design:type", String)
 ], Room.prototype, "block", void 0);
 __decorate([
-    typeorm_1.ManyToOne(type => resident_entity_1.Resident),
-    typeorm_1.JoinColumn({ name: 'resident_id' }),
+    typeorm_1.ManyToOne(type => resident_entity_1.Resident, { eager: true }),
+    typeorm_1.JoinColumn({ name: 'res_id' }),
     __metadata("design:type", resident_entity_1.Resident)
 ], Room.prototype, "resident", void 0);
 Room = __decorate([

@@ -18,10 +18,10 @@ export class Bill {
     @Column('text')
     comment: string;
 
-    @Column('double')
-    diff: number;
+    @Column('tinytext')
+    type: string;
 
     @ManyToOne(type => Booking)
     @JoinColumn({ name: 'booking_id' })
-    room: Booking;
+    booking: Booking;
 }

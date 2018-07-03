@@ -11,6 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const room_entity_1 = require("../room/room.entity");
+const bill_entity_1 = require("../bill/bill.entity");
+const teacher_entity_1 = require("../teacher/teacher.entity");
 let Booking = class Booking {
 };
 __decorate([
@@ -38,10 +40,19 @@ __decorate([
     __metadata("design:type", Number)
 ], Booking.prototype, "amount", void 0);
 __decorate([
-    typeorm_1.ManyToOne(type => room_entity_1.Room),
-    typeorm_1.JoinColumn({ name: 'room_id' }),
+    typeorm_1.ManyToOne(type => room_entity_1.Room, { eager: true }),
+    typeorm_1.JoinColumn({ name: 'r_id' }),
     __metadata("design:type", room_entity_1.Room)
 ], Booking.prototype, "room", void 0);
+__decorate([
+    typeorm_1.ManyToOne(type => teacher_entity_1.Teacher, { eager: true }),
+    typeorm_1.JoinColumn({ name: 't_id' }),
+    __metadata("design:type", teacher_entity_1.Teacher)
+], Booking.prototype, "teacher", void 0);
+__decorate([
+    typeorm_1.OneToMany(type => bill_entity_1.Bill, bill => bill.booking, { eager: true, cascade: true }),
+    __metadata("design:type", Array)
+], Booking.prototype, "bill", void 0);
 Booking = __decorate([
     typeorm_1.Entity()
 ], Booking);

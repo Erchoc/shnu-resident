@@ -4,12 +4,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // import { PhotoController } from './photo.controller';
 import { Bill } from './bill.entity';
 import {BillService} from './bill.service';
+import { BillController } from './bill.controller';
+import { MonthlyBillController } from './monthlybill.controller';
+import { MonthlyBillService } from './monthlybill.service';
+import { MonthlyBill } from './monthlybill.entity';
+import { SeasonBillService } from './seasonbill.service';
+import { SeasonBillController } from './seasonbill.controller';
+import { SeasonBill } from './seasonbill.entity';
+import { AnnualBillController } from './annualbill.controller';
+import { AnnualBill } from './annualbill.entity';
+import { AnnualBillService } from './annualbill.service';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Bill])],
-    providers: [BillService],
-    // controllers: [PhotoController],
-    exports: [BillService],
+    imports: [TypeOrmModule.forFeature([Bill,MonthlyBill,SeasonBill,AnnualBill])],
+    providers: [BillService,MonthlyBillService,SeasonBillService,AnnualBillService],
+    controllers: [BillController,MonthlyBillController,SeasonBillController,AnnualBillController],
+    exports: [BillService,MonthlyBillService,SeasonBillService,AnnualBillService],
 
 })
 export class BillModule {}

@@ -11,11 +11,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const booking_service_1 = require("./booking.service");
 const booking_entity_1 = require("./booking.entity");
 const booking_controller_1 = require("./booking.controller");
+const room_module_1 = require("../room/room.module");
 let BookingModule = class BookingModule {
 };
 BookingModule = __decorate([
     common_1.Module({
-        imports: [typeorm_1.TypeOrmModule.forFeature([booking_entity_1.Booking])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([booking_entity_1.Booking]), room_module_1.RoomModule],
         providers: [booking_service_1.BookingService],
         controllers: [booking_controller_1.BookingController],
         exports: [booking_service_1.BookingService],

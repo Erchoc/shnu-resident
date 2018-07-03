@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -18,34 +21,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("@nestjs/common");
-const jwt = require("jsonwebtoken");
-const consts_service_1 = require("../../consts/consts.service");
-let AuthService = class AuthService {
-    constructor(constsService) {
-        this.constsService = constsService;
+const crud_controller_1 = require("../infrastructure/nest-crud/crud.controller");
+const monthlybill_service_1 = require("./monthlybill.service");
+let MonthlyBillController = class MonthlyBillController extends crud_controller_1.CrudController {
+    constructor(service) {
+        super(service);
+        this.service = service;
     }
-    login(user) {
+    generateByYearAndMonth(year, month) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.validateUser(user)) {
-                return jwt.sign(user, 'secretKey', { expiresIn: 3600 });
-            }
-        });
-    }
-    validateUser(payload) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let pass = yield this.constsService.getPassword();
-            if (payload && payload.password === pass) {
-                return yield { username: 'admin', password: pass };
-            }
-            else {
-                return false;
-            }
+            let res = yield this.service.generateByYearAndMonth(year, month);
+            return !!res;
         });
     }
 };
-AuthService = __decorate([
-    common_1.Injectable(),
-    __metadata("design:paramtypes", [consts_service_1.ConstsService])
-], AuthService);
-exports.AuthService = AuthService;
-//# sourceMappingURL=auth.service.js.map
+__decorate([
+    common_1.Get(':year/:month/gen'),
+    __param(0, common_1.Param('year')), __param(1, common_1.Param('month')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], MonthlyBillController.prototype, "generateByYearAndMonth", null);
+MonthlyBillController = __decorate([
+    common_1.Controller('bill/monthly'),
+    __metadata("design:paramtypes", [monthlybill_service_1.MonthlyBillService])
+], MonthlyBillController);
+exports.MonthlyBillController = MonthlyBillController;
+//# sourceMappingURL=monthlybill.controller.js.map

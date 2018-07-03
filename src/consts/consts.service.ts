@@ -13,4 +13,9 @@ export class ConstsService extends CrudTypeOrmService<Consts>{
     ) {
         super(repo);
     }
+
+    public async getPassword(): Promise<string> {
+        let e = await this.repo.findOne({field:'password'})
+        return e.value
+    }
 }

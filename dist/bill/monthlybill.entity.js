@@ -10,26 +10,50 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
-let Consts = class Consts {
+let MonthlyBill = class MonthlyBill {
 };
 __decorate([
     typeorm_1.PrimaryGeneratedColumn(),
     __metadata("design:type", Number)
-], Consts.prototype, "id", void 0);
+], MonthlyBill.prototype, "id", void 0);
 __decorate([
     typeorm_1.Column('text'),
     __metadata("design:type", String)
-], Consts.prototype, "field", void 0);
+], MonthlyBill.prototype, "institute", void 0);
 __decorate([
     typeorm_1.Column('text'),
     __metadata("design:type", String)
-], Consts.prototype, "name", void 0);
+], MonthlyBill.prototype, "name", void 0);
 __decorate([
     typeorm_1.Column('text'),
     __metadata("design:type", String)
-], Consts.prototype, "value", void 0);
-Consts = __decorate([
+], MonthlyBill.prototype, "serial", void 0);
+__decorate([
+    typeorm_1.Column('double'),
+    __metadata("design:type", Number)
+], MonthlyBill.prototype, "amount", void 0);
+__decorate([
+    typeorm_1.Column('double'),
+    __metadata("design:type", Number)
+], MonthlyBill.prototype, "diff", void 0);
+__decorate([
+    typeorm_1.Column('int'),
+    __metadata("design:type", Number)
+], MonthlyBill.prototype, "year", void 0);
+__decorate([
+    typeorm_1.Column('int'),
+    __metadata("design:type", Number)
+], MonthlyBill.prototype, "month", void 0);
+__decorate([
+    typeorm_1.Column('text'),
+    __metadata("design:type", String)
+], MonthlyBill.prototype, "resident", void 0);
+__decorate([
+    typeorm_1.Column('text'),
+    __metadata("design:type", String)
+], MonthlyBill.prototype, "comment", void 0);
+MonthlyBill = __decorate([
     typeorm_1.Entity()
-], Consts);
-exports.Consts = Consts;
-//# sourceMappingURL=consts.entity.js.map
+], MonthlyBill);
+exports.MonthlyBill = MonthlyBill;
+//# sourceMappingURL=monthlybill.entity.js.map

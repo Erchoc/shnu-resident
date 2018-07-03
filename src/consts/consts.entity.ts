@@ -9,5 +9,8 @@ export class Consts {
     field: string;
 
     @Column('text')
+    name: string;
+
+    @Column('text')
     value: string;
 }

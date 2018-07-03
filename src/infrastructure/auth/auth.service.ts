@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 // import { UsersService } from '../users/users.service';
 import { JwtPayload } from './interface/jwt-payload.interface';
 import * as jwt from 'jsonwebtoken';
+import { ConstsService } from '../../consts/consts.service';
 
 @Injectable()
 export class AuthService {
     // constructor(private readonly usersService: UsersService) {}
+    constructor(private readonly constsService: ConstsService) {}
 
     async login(user: JwtPayload): Promise<string> {
         if (this.validateUser(user)) {
@@ -15,8 +17,9 @@ export class AuthService {
 
     async validateUser(payload: JwtPayload): Promise<any> {
         // return await this.usersService.findOneByToken(token);
-        if (payload && payload.password === '12345') {
-            return await {username: 'admin', password: '12345'};
+        let pass = await this.constsService.getPassword()
+        if (payload && payload.password === pass) {
+            return await {username: 'admin', password: pass};
         }else{
             return false
         }

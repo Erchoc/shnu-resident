@@ -34,14 +34,14 @@ __decorate([
     __metadata("design:type", String)
 ], Bill.prototype, "comment", void 0);
 __decorate([
-    typeorm_1.Column('double'),
-    __metadata("design:type", Number)
-], Bill.prototype, "diff", void 0);
+    typeorm_1.Column('tinytext'),
+    __metadata("design:type", String)
+], Bill.prototype, "type", void 0);
 __decorate([
     typeorm_1.ManyToOne(type => booking_entity_1.Booking),
     typeorm_1.JoinColumn({ name: 'booking_id' }),
     __metadata("design:type", booking_entity_1.Booking)
-], Bill.prototype, "room", void 0);
+], Bill.prototype, "booking", void 0);
 Bill = __decorate([
     typeorm_1.Entity()
 ], Bill);

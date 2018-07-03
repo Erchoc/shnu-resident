@@ -28,12 +28,18 @@ let CrudTypeOrmService = class CrudTypeOrmService {
             if (!entity || typeof entity !== 'object') {
                 throw new common_1.BadRequestException();
             }
+            entity = yield this.saveProccess(entity);
             try {
                 return yield this.repository.save(entity);
             }
             catch (err) {
                 throw new common_1.BadRequestException(err.message);
             }
+        });
+    }
+    saveProccess(entity) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return entity;
         });
     }
     getId(paramId) {
@@ -58,20 +64,42 @@ let CrudTypeOrmService = class CrudTypeOrmService {
             return entity;
         });
     }
-    getAll() {
+    getAll(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.repository.find();
+            return yield this.repository.find(params);
         });
     }
     query(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.repository.find(params);
+            let where = Object.assign({}, params);
+            let order = {};
+            delete where.skip;
+            delete where.take;
+            delete where.order;
+            for (let key in where) {
+                let val = unescape(where[key]).split('?').join('%').split('*').join('%');
+                if (val.indexOf('_') > -1 || val.indexOf('%') > -1) {
+                    where[key] = new typeorm_1.FindOperator('like', val);
+                }
+            }
+            if (params.order) {
+                params.order = params.order.split(',');
+                for (let i = 0; i < params.order.length; i += 2) {
+                    order[params.order[i]] = params.order[i + 1].toUpperCase();
+                }
+            }
+            return yield this.repository.findAndCount({ where: where, skip: params.skip, take: params.take, order: order });
         });
     }
     update(paramId, entity) {
         return __awaiter(this, void 0, void 0, function* () {
             const exists = yield this.getOne(paramId);
             return yield this.save(entity);
+        });
+    }
+    updateBatch(entities) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.repository.save(entities);
         });
     }
     delete(paramId) {

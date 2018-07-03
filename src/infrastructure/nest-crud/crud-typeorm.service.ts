@@ -14,7 +14,7 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
         if (!entity || typeof entity !== 'object') {
             throw new BadRequestException();
         }
-
+        entity = await this.saveProccess(entity)
         try {
             // https://github.com/typeorm/typeorm/issues/1544 is a known bug
             // so need to use `entity as any` for now
@@ -23,6 +23,10 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
         } catch (err) {
             throw new BadRequestException(err.message);
         }
+    }
+
+    public async saveProccess(entity: T): Promise<T> {
+        return entity;
     }
 
     protected getId(paramId: any): number {
@@ -94,6 +98,10 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
         const exists = await this.getOne(paramId);
 
         return await this.save(entity);
+    }
+
+    public async updateBatch(entities: any): Promise<T> {
+        return await this.repository.save(entities);
     }
 
     public async delete(paramId: any): Promise<void> {
