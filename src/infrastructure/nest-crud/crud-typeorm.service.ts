@@ -113,4 +113,13 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
             throw new NotFoundException();
         }
     }
+
+    public async deleteAll(param: any): Promise<void> {
+
+        try {
+            await this.repository.delete(param);
+        } catch (err) {
+            throw new NotFoundException();
+        }
+    }
 } /* istanbul ignore next */

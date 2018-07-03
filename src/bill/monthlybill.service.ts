@@ -27,7 +27,7 @@ export class MonthlyBillService extends CrudTypeOrmService<MonthlyBill>{
     public async generateSheetByYearAndMonthAndResident(year:string, month: string, resident:string) : Promise<MonthlyBill[]> {
         const excelBuf = await readFileAsync(join(__dirname,'../resources/monthlyBill.xlsx'))
         let data = await this.repo.find({where:{year:parseInt(year),month:parseInt(month),resident:new FindOperator('like','%'+resident+'%')}})
-        let dataToRender:any[] = data.map(r=>{return {id:r.id+'', name:r.name,serial:r.serial,amount:r.amount}})
+        let dataToRender:any[] = data.map(r=>{return {id:r.id+'', name:r.name,serial:"'"+r.serial,amount:r.amount}})
         dataToRender.push({id:'总计',amount:data.map(i=>i.amount).reduce((a,b)=>a+b)})
         let arrToRender = [[{booktitle:resident+'公寓（'+year+'年'+month+'月)'}],dataToRender]
 

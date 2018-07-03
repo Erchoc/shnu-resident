@@ -10,6 +10,8 @@ import { join } from 'path'
 import * as Excel from 'ejsexcel'
 import * as fs from 'fs';
 import * as util from 'util'
+import * as moment from 'moment'
+import { ConstsService } from '../consts/consts.service';
 const readFileAsync = util.promisify(fs.readFile);
 const writeFileAsync = util.promisify(fs.writeFile);
 
@@ -18,7 +20,8 @@ export class AnnualBillService extends CrudTypeOrmService<AnnualBill>{
     constructor(
         @InjectRepository(AnnualBill)
         private readonly repo: Repository<AnnualBill>,
-        private readonly billService: BillService
+        private readonly billService: BillService,
+        private readonly constService: ConstsService
     ) {
         super(repo);
     }
@@ -54,6 +57,8 @@ export class AnnualBillService extends CrudTypeOrmService<AnnualBill>{
 
     private async groupBillsAndGenSeasonByTeacher(bills: Bill[]): Promise<AnnualBill[]>{
         let res : AnnualBill[] = []
+        let subsidyRate = await this.constService.getAll({field:'rate'})
+        let realSubsidyRate = subsidyRate && subsidyRate[0] ? parseInt(subsidyRate[0].value) /100 : 0.5
         const groupedByTeacher = this.groupBy(bills, bill => bill.booking.teacher.serial)
         groupedByTeacher.forEach((bills : Bill[],serial: string)=>{
             let ab = new AnnualBill();
@@ -92,7 +97,12 @@ export class AnnualBillService extends CrudTypeOrmService<AnnualBill>{
                 ab.month12+=(monthStats[i]+',')
             }
             ab.month12 = ab.month12.slice(0, -1);
-            ab.subsidy = ab.amount / 2
+            let realCheckout = moment(ab.checkout) > moment().endOf('year') ? moment().endOf('year') : moment(ab.checkout)
+            let realCheckIn = moment(ab.checkin) < moment().startOf('year') ? moment().startOf('year') : moment(ab.checkin)
+
+            let daysDiff = moment(realCheckout).diff(moment(realCheckIn),'days') + 1
+            ab.subsidy = Math.ceil(ab.amount * realSubsidyRate * (daysDiff / 365))
+            ab.comment = '补贴计算调试信息：'+ab.amount+'*'+realSubsidyRate+'*('+daysDiff+' / 365)'+',其中实际结算的日期为'+realCheckIn.format('YYYY-MM-DD')+'至'+realCheckout.format('YYYY-MM-DD')
             let b1,b2;
             if(bookingKeyLists[0] < bookingKeyLists[1]){
                 b1 = bookingStats[bookingKeyLists[0]]

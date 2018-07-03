@@ -1,10 +1,13 @@
 
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindOperator } from 'typeorm';
 import { Booking } from './booking.entity';
 import {CrudTypeOrmService} from '../infrastructure/nest-crud/crud-typeorm.service';
 import { RoomService } from '../room/room.service';
+import { ResidentService } from '../resident/resident.service';
+import * as moment from 'moment'
+import { TeacherService } from '../teacher/teacher.service';
 
 @Injectable()
 export class BookingService extends CrudTypeOrmService<Booking>{
@@ -12,6 +15,8 @@ export class BookingService extends CrudTypeOrmService<Booking>{
         @InjectRepository(Booking)
         private readonly repo: Repository<Booking>,
         private readonly roomService: RoomService,
+        private readonly residentService: ResidentService,
+        private readonly teacherSercive: TeacherService
     ) {
         super(repo);
     }
@@ -21,6 +26,18 @@ export class BookingService extends CrudTypeOrmService<Booking>{
         entity = await this.updateRoom(entity)
         return entity
     }
+
+    public async findBookingByRoomAndSeason(region: string,room: string,season: number): Promise<Booking[]> {
+        let residents = await this.residentService.getAll({name:new FindOperator('like','%'+region+'%')})
+        if(residents.length < 1) return []
+        let rooms = await this.roomService.getAll({resident:new FindOperator('in',residents.map(r=>r.id)),room:room})
+        if(rooms.length < 1) return []
+        let startedAt = moment().month((season-1)*3).startOf('month').toDate()
+        let endsAt = moment().month((season-1)*3+2).endOf('month').toDate()
+        
+        return await this.getAll({room: new FindOperator('in',rooms.map(r=>r.id)),checkin:new FindOperator('lessThan',endsAt),checkout:new FindOperator('moreThan',startedAt)})
+    }
+
 
     private async updateRoom(entity:Booking): Promise<Booking>{
         let newRoom = entity.room
