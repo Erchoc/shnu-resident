@@ -37,7 +37,8 @@
     "rxjs": "^6.0.0",
     "typeorm": "^0.2.7",
     "typescript": "^2.6.2",
-    "xlsx": "^0.13.1"
+    "xlsx": "^0.13.1",
+    "xlsx-style": "^0.8.13"
   },
   "devDependencies": {
     "@nestjs/testing": "^5.0.0",

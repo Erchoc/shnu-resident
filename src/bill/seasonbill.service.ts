@@ -10,28 +10,76 @@ import { join } from 'path'
 import * as Excel from 'ejsexcel'
 import * as fs from 'fs';
 import * as util from 'util'
+import { ResidentService } from '../resident/resident.service';
+import * as streamToPromise from 'stream-to-promise'
 const readFileAsync = util.promisify(fs.readFile);
+
 const writeFileAsync = util.promisify(fs.writeFile);
+import * as XLSX from 'exceljs'
+import { Stream } from 'stream';
+const stream = require('stream');
+
 
 @Injectable()
 export class SeasonBillService extends CrudTypeOrmService<SeasonBill>{
     constructor(
         @InjectRepository(SeasonBill)
         private readonly repo: Repository<SeasonBill>,
-        private readonly billService: BillService
+        private readonly billService: BillService,
+        private readonly residentService: ResidentService
     ) {
         super(repo);
     }
 
 
-    public async generateSheetByYearAndSeasonAndResident(year:string, season: string, resident:string) : Promise<SeasonBill[]> {
+    public async generateSheetByYearAndSeasonAndResident(year:string, season: string, resident:string) : Promise<any> {
         const excelBuf = await readFileAsync(join(__dirname,'../resources/SeasonBill.xlsx'))
         let data = await this.repo.find({where:{year:parseInt(year),season:parseInt(season),resident:new FindOperator('like','%'+resident+'%')}})
+        if(!data || data.length < 1) return await Excel.renderExcel(excelBuf, [[{booktitle:resident+'公寓（'+year+'年第'+season+'季度)'}],[{}]]);
         let dataToRender:any[] = data.map(r=>{return {id:r.id+'', resident:r.resident,contact:r.contact,start:r.start,end:r.end,institute:r.institute,name:r.name,serial:r.serial,amount:r.month1+r.month2+r.month3,month1:r.month1,month2:r.month2,month3:r.month3}})
         dataToRender.push({id:'总计',amount:dataToRender.map(i=>i.amount).reduce((a,b)=>a+b),month1:dataToRender.map(i=>i.month1).reduce((a,b)=>a+b),month2:dataToRender.map(i=>i.month2).reduce((a,b)=>a+b),month3:dataToRender.map(i=>i.month3).reduce((a,b)=>a+b)})
         let arrToRender = [[{booktitle:resident+'公寓（'+year+'年第'+season+'季度)'}],dataToRender]
 
         return await Excel.renderExcel(excelBuf, arrToRender);
+        
+    }
+
+    public async generateSheetByYearAndSeason(year:string, season: string, res:any) : Promise<any> {
+
+        let wbGeneral = new XLSX.Workbook();
+
+        let allResidents = await this.residentService.getAll({})
+        for(let i in allResidents){
+            let j = allResidents[i]
+            let wbSub = new XLSX.Workbook();        
+            let sub = await this.generateSheetByYearAndSeasonAndResident(year,season,j.name)
+            var bufferStream = new stream.PassThrough();
+
+            bufferStream.end(new Buffer(sub));
+            let workbook = await wbSub.xlsx.read(bufferStream)
+            let wsSub =workbook.getWorksheet(1);
+            let wsGen = wbGeneral.addWorksheet(j.name,{pageSetup:wsSub.pageSetup,views:wsSub.views,properties:wsSub.properties})
+            wsGen.model = wsSub.model
+            wsGen.name = j.name
+            for(let masterName in wsSub._merges){
+                let dimensions =  wsSub._merges[masterName].model
+                let master = wsGen.getCell(dimensions.top, dimensions.left);
+                for (let i = dimensions.top; i <= dimensions.bottom; i++) {
+                    for (let j = dimensions.left; j <= dimensions.right; j++) {
+                        if ((i > dimensions.top) || (j > dimensions.left)) {
+                            wsGen.getCell(i, j).merge(master);
+                        }
+                    }
+                }
+            }
+        
+
+
+        }
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=Report.xlsx');
+
+        return await wbGeneral.xlsx.write(res)
         
     }
 

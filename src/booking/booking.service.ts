@@ -39,6 +39,22 @@ export class BookingService extends CrudTypeOrmService<Booking>{
     }
 
 
+    public async findBookingByRoomBlockTeacherNameAndSeason(region: string,room: string,block: string, name:string, season: number): Promise<Booking[]> {
+        let residents = await this.residentService.getAll({name:new FindOperator('like','%'+region+'%')})
+        if(residents.length < 1) return []
+        let rooms = await this.roomService.getAll({resident:new FindOperator('in',residents.map(r=>r.id)),room:room,block:block})
+        if(rooms.length < 1) return []
+        let teachers = await this.teacherSercive.getAll({name:name})
+        if(teachers.length < 1) return []
+        
+        let startedAt = moment().month((season-1)*3).startOf('month').toDate()
+        let endsAt = moment().month((season-1)*3+2).endOf('month').toDate()
+        
+        return await this.getAll({room: new FindOperator('in',rooms.map(r=>r.id)),teacher: new FindOperator('in',teachers.map(r=>r.id)),checkin:new FindOperator('lessThan',endsAt),checkout:new FindOperator('moreThan',startedAt)})
+    }
+
+
+
     private async updateRoom(entity:Booking): Promise<Booking>{
         let newRoom = entity.room
         delete newRoom.id

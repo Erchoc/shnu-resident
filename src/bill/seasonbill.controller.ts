@@ -18,10 +18,18 @@ export class SeasonBillController extends CrudController<SeasonBill>{
     }
 
     @Get(':year/:season/resident/:resident/sheet')
-    public async generateSheetByYearAndSeason(@Param('year') year: string,@Param('season') season: string,@Param('resident') resident: string,@Res() resp): Promise<any> {
+    public async generateSheetByYearAndSeasonAndResident(@Param('year') year: string,@Param('season') season: string,@Param('resident') resident: string,@Res() resp): Promise<any> {
+        
         let res =  await this.service.generateSheetByYearAndSeasonAndResident(year,season,resident);
         resp.contentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         resp.send(res)
+    }
+
+    @Get(':year/:season/sheet')
+    public async generateSheetByYearAndSeason(@Param('year') year: string,@Param('season') season: string, @Res() resp): Promise<any> {
+        let res =  await this.service.generateSheetByYearAndSeason(year,season,resp);
+        resp.end()
+        // resp.send(res)
     }
 
 }

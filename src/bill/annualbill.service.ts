@@ -65,6 +65,7 @@ export class AnnualBillService extends CrudTypeOrmService<AnnualBill>{
             let monthStats = {1:0,2:0,3:0,4:0,5:0,6:0,7:0,8:0,9:0,10:0,11:0,12:0}
             let bookingStats = {}
             let bookingKeyLists = []
+            let subsidyDisabled = false
             ab.amount = 0; ab.month12 = '';
             bills.forEach((bill:Bill)=>{
                 monthStats[bill.month] += (bill.amount)
@@ -84,6 +85,8 @@ export class AnnualBillService extends CrudTypeOrmService<AnnualBill>{
                     }else{
                          ab.checkout = laterDate
                     }
+                }else{
+                    subsidyDisabled = true
                 }
                 ab.name = bill.booking.teacher.name
                 ab.institute = bill.booking.teacher.institute
@@ -101,8 +104,8 @@ export class AnnualBillService extends CrudTypeOrmService<AnnualBill>{
             let realCheckIn = moment(ab.checkin) < moment().startOf('year') ? moment().startOf('year') : moment(ab.checkin)
 
             let daysDiff = moment(realCheckout).diff(moment(realCheckIn),'days') + 1
-            ab.subsidy = Math.ceil(ab.amount * realSubsidyRate * (daysDiff / 365))
-            ab.comment = '补贴计算调试信息：'+ab.amount+'*'+realSubsidyRate+'*('+daysDiff+' / 365)'+',其中实际结算的日期为'+realCheckIn.format('YYYY-MM-DD')+'至'+realCheckout.format('YYYY-MM-DD')
+            ab.subsidy = subsidyDisabled ? 0 : Math.ceil(ab.amount * realSubsidyRate * (daysDiff / 365))
+            ab.comment = subsidyDisabled ? '补贴计算调试信息：有异常情况':'补贴计算调试信息：'+ab.amount+'*'+realSubsidyRate+'*('+daysDiff+' / 365)'+',其中实际结算的日期为'+realCheckIn.format('YYYY-MM-DD')+'至'+realCheckout.format('YYYY-MM-DD')
             let b1,b2;
             if(bookingKeyLists[0] < bookingKeyLists[1]){
                 b1 = bookingStats[bookingKeyLists[0]]
