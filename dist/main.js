@@ -21,6 +21,7 @@ function bootstrap() {
             .build();
         const document = swagger_1.SwaggerModule.createDocument(app, options);
         swagger_1.SwaggerModule.setup('api', app, document);
+        app.useStaticAssets(__dirname + '/resources');
         app.enableCors();
         yield app.listen(3000);
     });

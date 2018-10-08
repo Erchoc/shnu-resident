@@ -1,5 +1,5 @@
 
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject,forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOperator } from 'typeorm';
 import { Booking } from './booking.entity';
@@ -8,6 +8,7 @@ import { RoomService } from '../room/room.service';
 import { ResidentService } from '../resident/resident.service';
 import * as moment from 'moment'
 import { TeacherService } from '../teacher/teacher.service';
+import { BillService } from '../bill/bill.service';
 
 @Injectable()
 export class BookingService extends CrudTypeOrmService<Booking>{
@@ -16,7 +17,10 @@ export class BookingService extends CrudTypeOrmService<Booking>{
         private readonly repo: Repository<Booking>,
         private readonly roomService: RoomService,
         private readonly residentService: ResidentService,
-        private readonly teacherSercive: TeacherService
+        private readonly teacherSercive: TeacherService,  
+        @Inject(forwardRef(() => BillService))  
+        private readonly billService: BillService
+
     ) {
         super(repo);
     }
@@ -66,6 +70,42 @@ export class BookingService extends CrudTypeOrmService<Booking>{
             entity.room = newRoom
         }
         return entity
+    }
+
+    public async queryNested(q:any): Promise<any> {
+        let qb = this.repo.createQueryBuilder("booking")
+        .leftJoinAndSelect("booking.teacher","teacher")
+        .leftJoinAndSelect("booking.room","room")
+        .leftJoinAndSelect("room.resident","resident")
+        .leftJoinAndSelect("booking.bill","bill")
+        
+        if(q.teacher){
+            qb.andWhere("teacher.id= :id",{id: q.teacher})
+        }
+        if(q['room.resident']){
+            qb.andWhere("resident.id= :id",{id: q['room.resident']})
+        }
+        if(q['room']){
+            qb.andWhere("room.id= :id",{id: q['room']})
+        }
+        qb.skip(q.skip)
+        qb.take(q.take)
+        const bookings = await qb.getMany()
+        const count = await qb.getCount()
+        let currPage = ~~(q.skip / q.take)+1
+        let maxPage = Math.ceil(count / q.take)
+        return {total:count,result:bookings,currPage:currPage,maxPage:maxPage}
+    }
+
+    public async delete(paramId: any): Promise<void> {
+        const entity = await this.getOne(paramId)
+        this.billService.deleteAll(entity.bill)
+
+        try {
+            await this.repository.delete(entity);
+        } catch (err) {
+            
+        }
     }
 
 }

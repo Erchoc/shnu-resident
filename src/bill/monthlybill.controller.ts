@@ -11,10 +11,32 @@ export class MonthlyBillController extends CrudController<MonthlyBill>{
         super(service);
     }
 
-    @Get(':year/:month/gen')
-    public async generateByYearAndMonth(@Param('year') year: string,@Param('month') month: string): Promise<boolean> {
-        let res =  await this.service.generateByYearAndMonth(year,month);
+    @Post('/gen')
+    public async generate(@Body() range): Promise<any> {
+        let [from,to]=range.range
+        if(!from || !to) return []
+        let res:MonthlyBill[] =  await this.service.generateByYearAndMonth(from,to)
+        // let times = await this.service.findCreatedAts()
+        // return times.length ? times[0] : null
         return !!res
+    }
+
+
+    @Post('/peek')
+    public async peek(@Body() range): Promise<any> {
+        let [from,to]=range.range
+        if(!from || !to) return []
+        let res:MonthlyBill[] =  await this.service.peekByYearAndMonth(from,to)
+        // let times = await this.service.findCreatedAts()
+        // return times.length ? times[0] : null
+        return res
+    }
+
+    @Get(':year/:month/sheet')
+    public async generateByYearAndMonth(@Param('year') year: string,@Param('month') month: string, @Res() resp): Promise<any> {
+        let res =  await this.service.generateXLSXByYearAndMonth(year,month,resp);
+        resp.end()
+        // return !!res
     }
 
     @Get(':year/:month/resident/:resident/sheet')

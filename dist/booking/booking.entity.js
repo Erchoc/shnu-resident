@@ -40,6 +40,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Booking.prototype, "amount", void 0);
 __decorate([
+    typeorm_1.Column('double'),
+    __metadata("design:type", Number)
+], Booking.prototype, "rent", void 0);
+__decorate([
     typeorm_1.ManyToOne(type => room_entity_1.Room, { eager: true }),
     typeorm_1.JoinColumn({ name: 'r_id' }),
     __metadata("design:type", room_entity_1.Room)

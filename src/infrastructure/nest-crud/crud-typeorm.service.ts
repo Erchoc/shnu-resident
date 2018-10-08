@@ -58,7 +58,35 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
         return await this.repository.find(params);
     }
 
+    public path2obj(p: String,val:any):any{
+        let dotArr = p.split('.')
+        let inner = {}
+        if(dotArr.length ==0){
+            return null
+        } else if(dotArr.length ==1){
+            inner[dotArr[0]] = val
+            return inner
+        }
+        else if(dotArr.length == 2) {
+            let key1 = dotArr[0] 
+            let key2 = dotArr[1]
+            let i = {}
+            i[key2]=val
+            inner[key1] = i
+            return i
+        }else{
+            for(let i = dotArr.length -1; i >=1; i--){
+                if (dotArr[i+1]) delete inner[dotArr[i+1]]
+                inner[dotArr[i]] = val
+                val = JSON.parse(JSON.stringify(inner))
+            }
+            return inner
+        }
+    }
     public async query(params: any): Promise<[T[], number]> {
+        // let relations = this.repository.metadata.eagerRelations.map(i=>i.propertyName)
+        let relations = []
+
         let where = {...params}
         // let relations = []
         let order = {}
@@ -68,10 +96,15 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
         delete where.order
 
         for (let key in where) {
-            let val = unescape(where[key]).split('?').join('%').split('*').join('%')
+            let val:any = unescape(where[key]).split('?').join('%').split('*').join('%')
             if(val.indexOf('_')>-1 || val.indexOf('%')>-1){
-                where[key] = new FindOperator('like',val)
+                val = new FindOperator('like',val)
+                where[key] = val
             }
+            // if(key.indexOf(".")>-1){
+                
+            //     where[key.split(".")[0]] = this.path2obj(key,val)
+            // }
             // if(key){
             //     let arrK=key.split('.')
             //     if(arrK.length>1){
@@ -91,7 +124,7 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
         }
 
 
-        return await this.repository.findAndCount({where:where,skip:params.skip,take:params.take,order:order});
+        return await this.repository.findAndCount({relations:relations,where:where,skip:params.skip,take:params.take,order:order});
     }
 
     public async update(paramId: any, entity: T): Promise<T> {
@@ -102,6 +135,14 @@ export class CrudTypeOrmService<T> implements CrudService<T> {
 
     public async updateBatch(entities: any): Promise<T> {
         return await this.repository.save(entities);
+    }
+
+
+    public async deleteBatch(entities: any): Promise<T> {
+        if(entities.length){
+            return await this.repository.delete(entities);
+        }
+        return null;
     }
 
     public async delete(paramId: any): Promise<void> {

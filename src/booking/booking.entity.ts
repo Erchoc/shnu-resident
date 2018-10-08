@@ -35,6 +35,6 @@ export class Booking {
     @JoinColumn({ name: 't_id' })
     teacher: Teacher;
 
-    @OneToMany(type => Bill , bill=>bill.booking, {eager: true,cascade:true})
+    @OneToMany(type => Bill , bill=>bill.booking, {eager: true,cascade:true, onDelete: 'CASCADE' })
     bill: Bill[];
 }

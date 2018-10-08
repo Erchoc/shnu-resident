@@ -34,6 +34,13 @@ let MonthlyBillController = class MonthlyBillController extends crud_controller_
             return !!res;
         });
     }
+    generateSheetByYearAndMonth(year, month, resident, resp) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let res = yield this.service.generateSheetByYearAndMonthAndResident(year, month, resident);
+            resp.contentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            resp.send(res);
+        });
+    }
 };
 __decorate([
     common_1.Get(':year/:month/gen'),
@@ -42,6 +49,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], MonthlyBillController.prototype, "generateByYearAndMonth", null);
+__decorate([
+    common_1.Get(':year/:month/resident/:resident/sheet'),
+    __param(0, common_1.Param('year')), __param(1, common_1.Param('month')), __param(2, common_1.Param('resident')), __param(3, common_1.Res()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, Object]),
+    __metadata("design:returntype", Promise)
+], MonthlyBillController.prototype, "generateSheetByYearAndMonth", null);
 MonthlyBillController = __decorate([
     common_1.Controller('bill/monthly'),
     __metadata("design:paramtypes", [monthlybill_service_1.MonthlyBillService])

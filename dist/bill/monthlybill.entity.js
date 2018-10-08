@@ -45,6 +45,10 @@ __decorate([
     __metadata("design:type", Number)
 ], MonthlyBill.prototype, "month", void 0);
 __decorate([
+    typeorm_1.Column('int'),
+    __metadata("design:type", Boolean)
+], MonthlyBill.prototype, "amount_differed", void 0);
+__decorate([
     typeorm_1.Column('text'),
     __metadata("design:type", String)
 ], MonthlyBill.prototype, "resident", void 0);

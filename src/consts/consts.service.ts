@@ -18,4 +18,13 @@ export class ConstsService extends CrudTypeOrmService<Consts>{
         let e = await this.repo.findOne({field:'password'})
         return e.value
     }
+
+    public async getSubsidy(): Promise<number> {
+        try{
+            let e = await this.repo.findOne({field:'rate'})
+            return e.value ? parseFloat(e.value) / 100.0 : 0.5
+        }catch(e){
+            return 0.5
+        }
+    }
 }

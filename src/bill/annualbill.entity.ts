@@ -59,4 +59,7 @@ export class AnnualBill {
 
     @Column('date')
     checkout: Date;
+
+    @Column('datetime')
+    generated_at: Date;
 }

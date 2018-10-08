@@ -1,5 +1,5 @@
 
-import { Module } from '@nestjs/common';
+import { Module,forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 // import { PhotoController } from './photo.controller';
 import { Bill } from './bill.entity';
@@ -27,7 +27,7 @@ import { CheckinBillController } from './checkinbill.controller';
 import { CheckinBill } from './checkinbill.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Bill,MonthlyBill,SeasonBill,AnnualBill,CorpBill,CheckinBill]),ConstsModule,TeacherModule,RoomModule,ResidentModule,BookingModule],
+    imports: [TypeOrmModule.forFeature([Bill,MonthlyBill,SeasonBill,AnnualBill,CorpBill,CheckinBill]),ConstsModule,TeacherModule,RoomModule,ResidentModule,forwardRef(() => BookingModule)],
     providers: [BillService,MonthlyBillService,SeasonBillService,AnnualBillService,CorpBillService,CheckinBillService],
     controllers: [BillController,MonthlyBillController,SeasonBillController,AnnualBillController,CorpBillController,CheckinBillController],
     exports: [BillService,MonthlyBillService,SeasonBillService,AnnualBillService,CorpBillService,CheckinBillService],

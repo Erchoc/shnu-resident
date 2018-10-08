@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
 const room_entity_1 = require("../room/room.entity");
+const teacher_entity_1 = require("../teacher/teacher.entity");
 let Electricity = class Electricity {
 };
 __decorate([
@@ -30,10 +31,35 @@ __decorate([
     __metadata("design:type", Number)
 ], Electricity.prototype, "amount", void 0);
 __decorate([
+    typeorm_1.Column('text'),
+    __metadata("design:type", String)
+], Electricity.prototype, "roomname", void 0);
+__decorate([
+    typeorm_1.Column('text'),
+    __metadata("design:type", String)
+], Electricity.prototype, "teachername", void 0);
+__decorate([
+    typeorm_1.Column('text'),
+    __metadata("design:type", String)
+], Electricity.prototype, "serial", void 0);
+__decorate([
+    typeorm_1.Column('text'),
+    __metadata("design:type", String)
+], Electricity.prototype, "comment", void 0);
+__decorate([
+    typeorm_1.Column('text'),
+    __metadata("design:type", String)
+], Electricity.prototype, "resident", void 0);
+__decorate([
     typeorm_1.ManyToOne(type => room_entity_1.Room),
-    typeorm_1.JoinColumn({ name: 'room_id' }),
+    typeorm_1.JoinColumn({ name: 'r_id' }),
     __metadata("design:type", room_entity_1.Room)
 ], Electricity.prototype, "room", void 0);
+__decorate([
+    typeorm_1.ManyToOne(type => teacher_entity_1.Teacher),
+    typeorm_1.JoinColumn({ name: 't_id' }),
+    __metadata("design:type", teacher_entity_1.Teacher)
+], Electricity.prototype, "teacher", void 0);
 Electricity = __decorate([
     typeorm_1.Entity()
 ], Electricity);

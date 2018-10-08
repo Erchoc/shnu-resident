@@ -23,8 +23,18 @@ export class CrudController<T> {
         return await this.crudService.updateBatch(entity);
     }
 
+    @Delete('batch')
+    public async deleteBatch(@Body() entity: T[]) {
+        return await this.crudService.deleteBatch(entity);
+    }
+
     @Get('query')
     public async query(@Query() q:any): Promise<any> {
+        for(let key in q){
+            if(key.indexOf('_at')>-1){
+                q[key] = new Date(q[key])
+            }
+        }
         let res = await this.crudService.query(q);
         let currPage = ~~(q.skip / q.take)+1
         let maxPage = Math.ceil(res[1] / q.take)

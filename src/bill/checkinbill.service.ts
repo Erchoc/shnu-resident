@@ -48,7 +48,7 @@ export class CheckinBillService extends CrudTypeOrmService<CheckinBill>{
 
     private async groupBillsAndGenMonthlyByTeacher(bills: Bill[]): Promise<MonthlyBill[]>{
         let res : MonthlyBill[] = []
-        const groupedByTeacher = this.groupBy(bills, bill => bill.booking.teacher.serial)
+        const groupedByTeacher = this.groupBy(bills, bill => bill.booking.teacher.serial+bill.booking.room.resident.name)
         groupedByTeacher.forEach((bills,serial)=>{
             let mb = new MonthlyBill();
             mb.amount = 0; mb.diff = 0;

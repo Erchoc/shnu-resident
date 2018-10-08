@@ -11,11 +11,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const electricity_service_1 = require("./electricity.service");
 const electricity_entity_1 = require("./electricity.entity");
 const electricity_controller_1 = require("./electricity.controller");
+const booking_module_1 = require("../booking/booking.module");
 let ElectricityModule = class ElectricityModule {
 };
 ElectricityModule = __decorate([
     common_1.Module({
-        imports: [typeorm_1.TypeOrmModule.forFeature([electricity_entity_1.Electricity])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([electricity_entity_1.Electricity]), booking_module_1.BookingModule],
         providers: [electricity_service_1.ElectricityService],
         controllers: [electricity_controller_1.ElectricityController],
         exports: [electricity_service_1.ElectricityService],

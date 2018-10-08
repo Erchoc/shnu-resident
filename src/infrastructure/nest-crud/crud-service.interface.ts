@@ -5,5 +5,6 @@ export interface CrudService<T> {
     query(param: any): Promise<[T[], number]>;
     update(id: any, entity: T): Promise<T>;
     updateBatch(entity: T[]): Promise<T>;
+    deleteBatch(entity: T[]): Promise<T>;
     delete(id: any);
 }

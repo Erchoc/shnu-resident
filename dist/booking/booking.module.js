@@ -12,11 +12,13 @@ const booking_service_1 = require("./booking.service");
 const booking_entity_1 = require("./booking.entity");
 const booking_controller_1 = require("./booking.controller");
 const room_module_1 = require("../room/room.module");
+const resident_module_1 = require("../resident/resident.module");
+const teacher_module_1 = require("../teacher/teacher.module");
 let BookingModule = class BookingModule {
 };
 BookingModule = __decorate([
     common_1.Module({
-        imports: [typeorm_1.TypeOrmModule.forFeature([booking_entity_1.Booking]), room_module_1.RoomModule],
+        imports: [typeorm_1.TypeOrmModule.forFeature([booking_entity_1.Booking]), room_module_1.RoomModule, resident_module_1.ResidentModule, teacher_module_1.TeacherModule],
         providers: [booking_service_1.BookingService],
         controllers: [booking_controller_1.BookingController],
         exports: [booking_service_1.BookingService],

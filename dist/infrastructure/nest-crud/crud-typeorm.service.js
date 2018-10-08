@@ -113,6 +113,16 @@ let CrudTypeOrmService = class CrudTypeOrmService {
             }
         });
     }
+    deleteAll(param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.repository.delete(param);
+            }
+            catch (err) {
+                throw new common_1.NotFoundException();
+            }
+        });
+    }
 };
 CrudTypeOrmService = __decorate([
     common_1.Injectable(),

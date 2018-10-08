@@ -11,8 +11,8 @@ import * as Excel from 'ejsexcel'
 import * as fs from 'fs';
 import * as util from 'util'
 import { ResidentService } from '../resident/resident.service';
-import * as streamToPromise from 'stream-to-promise'
 const readFileAsync = util.promisify(fs.readFile);
+import * as moment from 'moment'
 
 const writeFileAsync = util.promisify(fs.writeFile);
 import * as XLSX from 'exceljs'
@@ -35,10 +35,10 @@ export class SeasonBillService extends CrudTypeOrmService<SeasonBill>{
     public async generateSheetByYearAndSeasonAndResident(year:string, season: string, resident:string) : Promise<any> {
         const excelBuf = await readFileAsync(join(__dirname,'../resources/SeasonBill.xlsx'))
         let data = await this.repo.find({where:{year:parseInt(year),season:parseInt(season),resident:new FindOperator('like','%'+resident+'%')}})
-        if(!data || data.length < 1) return await Excel.renderExcel(excelBuf, [[{booktitle:resident+'公寓（'+year+'年第'+season+'季度)'}],[{}]]);
+        if(!data || data.length < 1) return await Excel.renderExcel(excelBuf, [[{booktitle:resident+'（'+year+'年第'+season+'季度)'}],[{}]]);
         let dataToRender:any[] = data.map(r=>{return {id:r.id+'', resident:r.resident,contact:r.contact,start:r.start,end:r.end,institute:r.institute,name:r.name,serial:r.serial,amount:r.month1+r.month2+r.month3,month1:r.month1,month2:r.month2,month3:r.month3}})
         dataToRender.push({id:'总计',amount:dataToRender.map(i=>i.amount).reduce((a,b)=>a+b),month1:dataToRender.map(i=>i.month1).reduce((a,b)=>a+b),month2:dataToRender.map(i=>i.month2).reduce((a,b)=>a+b),month3:dataToRender.map(i=>i.month3).reduce((a,b)=>a+b)})
-        let arrToRender = [[{booktitle:resident+'公寓（'+year+'年第'+season+'季度)'}],dataToRender]
+        let arrToRender = [[{booktitle:resident+'（'+year+'年第'+season+'季度)'}],dataToRender]
 
         return await Excel.renderExcel(excelBuf, arrToRender);
         
@@ -85,8 +85,8 @@ export class SeasonBillService extends CrudTypeOrmService<SeasonBill>{
 
     public async generateByYearAndSeason(year:string, season: string) : Promise<SeasonBill[]> {
         let monthBase = (parseInt(season) - 1) * 3 + 1
-        let currentMonth = ((new Date()).getMonth())+1
-        if (currentMonth < monthBase || currentMonth > monthBase+2) return null // 非本季
+        // let currentMonth = ((new Date()).getMonth())+1
+        // if (currentMonth < monthBase || currentMonth > monthBase+2) return null // 非本季
         // [monthBase,monthBase+1,monthBase+2]
         
         let findOption = {where:{year:parseInt(year),month:new FindOperator('in',[monthBase,monthBase+1,monthBase+2])}}
@@ -99,11 +99,16 @@ export class SeasonBillService extends CrudTypeOrmService<SeasonBill>{
     private async groupBillsAndGenSeasonByTeacher(bills: Bill[],season:number): Promise<SeasonBill[]>{
         let res : SeasonBill[] = []
         let monthBase = (season - 1) * 3 + 1
-        const groupedByTeacher = this.groupBy(bills, bill => bill.booking.teacher.serial)
+        bills = bills.filter(b => b.booking!=null && b.booking.teacher!=null)
+        const groupedByTeacher = this.groupBy(bills, bill => bill.booking.teacher.serial + bill.booking.room.resident.name)
         groupedByTeacher.forEach((bills : Bill[],serial: string)=>{
             let sb = new SeasonBill();
             sb.month1 = 0; sb.month2 = 0; sb.month3 = 0;
             bills.forEach((bill:Bill)=>{
+                if(bill.month > monthBase){
+                    sb.start = moment().month(monthBase - 1).startOf('month').toDate();
+                }
+
                 if(bill.month === monthBase){
                     sb.month1+=bill.amount
                     if(bill.type === '正常'){
@@ -125,6 +130,10 @@ export class SeasonBillService extends CrudTypeOrmService<SeasonBill>{
                         }else{
                             sb.end = laterDate
                         }
+                        let endOfMonth = moment().month(monthBase +1).endOf('month')
+                        if(moment(sb.end) > endOfMonth){
+                            sb.end = endOfMonth.toDate()
+                        }
                     }
                 }
                 sb.name = bill.booking.teacher.name
@@ -132,8 +141,9 @@ export class SeasonBillService extends CrudTypeOrmService<SeasonBill>{
                 sb.contact = bill.booking.teacher.contact
                 sb.season = season
                 sb.year = bill.year
-                sb.serial = serial
+                sb.serial = bill.booking.teacher.serial
                 sb.resident = bill.booking.room.resident.name + bill.booking.room.block+'栋'+bill.booking.room.room+'室'
+                sb.comment = '调试信息：'+serial
             })
             res.push(sb)
         })

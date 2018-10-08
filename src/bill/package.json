@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "exceljs": "^1.5.1",
-    "stream-to-promise": "^2.2.0"
-  }
-}

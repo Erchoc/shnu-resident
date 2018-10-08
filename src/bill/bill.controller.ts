@@ -10,6 +10,12 @@ export class BillController extends CrudController<Bill>{
         super(service);
     }
 
+
+    @Get('fix')
+    public async fix(): Promise<any> {
+        return this.service.billFix()
+    }
+
     @Get('anomaly')
     public async anomaly(): Promise<any> {
         let month = new Date().getMonth()
