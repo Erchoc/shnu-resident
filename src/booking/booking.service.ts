@@ -78,7 +78,10 @@ export class BookingService extends CrudTypeOrmService<Booking>{
         .leftJoinAndSelect("booking.room","room")
         .leftJoinAndSelect("room.resident","resident")
         .leftJoinAndSelect("booking.bill","bill")
-        
+        .addOrderBy("resident.name","DESC")
+        .addOrderBy("room.block","DESC")
+        .addOrderBy("room.room","DESC")
+
         if(q.teacher){
             qb.andWhere("teacher.id= :id",{id: q.teacher})
         }

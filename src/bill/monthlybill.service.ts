@@ -45,9 +45,9 @@ export class MonthlyBillService extends CrudTypeOrmService<MonthlyBill>{
         let dataToRender:any[] = data.map(r=>{
             id+=1
             if(r.amount_differed){
-                return {id:id+'**RED**', name:r.name+'**RED**',serial:r.serial+'**RED**',amount:r.amount+'**RED**'}
+                return {id:id+'**RED**', name:r.name+'**RED**',serial:r.serial+'**RED**',amount:((r.amount+r.diff)*(1-r.subsidy))+'**RED**'}
             }else{
-                return {id:id+'', name:r.name,serial:r.serial,amount:r.amount}
+                return {id:id+'', name:r.name,serial:r.serial,amount:(r.amount+r.diff)*(1-r.subsidy)}
             }
         })
         dataToRender.push({id:'总计',amount:data.map(i=>i.amount).reduce((a,b)=>a+b)})
@@ -69,9 +69,9 @@ export class MonthlyBillService extends CrudTypeOrmService<MonthlyBill>{
         let dataToRender:any[] = data.map(r=>{
             id+=1
             if(r.amount_differed){
-                return {id:id+'**RED**', name:r.name+'**RED**',serial:r.serial+'**RED**',amount:r.amount+'**RED**'}
+                return {id:id+'**RED**', name:r.name+'**RED**',serial:r.serial+'**RED**',amount:((r.amount+r.diff)*(1-r.subsidy))+'**RED**'}
             }else{
-                return {id:id+'', name:r.name,serial:r.serial,amount:r.amount}
+                return {id:id+'', name:r.name,serial:r.serial,amount:(r.amount+r.diff)*(1-r.subsidy)}
             }
         })
         dataToRender.push({id:'总计',amount:data.map(i=>i.amount).reduce((a,b)=>a+b)})
@@ -118,8 +118,9 @@ export class MonthlyBillService extends CrudTypeOrmService<MonthlyBill>{
     public async generateXLSXByYearAndMonth(year:string, month: string, res:any) : Promise<any> {
 
         let wbGeneral = new XLSX.Workbook();
-
+        let others = []
         let allResidents = await this.residentService.getAll({})
+        let mainResidents = ['金塘','馨逸','金辉']
         for(let i in allResidents){
             let j = allResidents[i]
             let wbSub = new XLSX.Workbook();        
@@ -127,29 +128,50 @@ export class MonthlyBillService extends CrudTypeOrmService<MonthlyBill>{
             if(!data || !data.length){
                 continue;
             }
-            let sub = await this.generateSheetByYearAndMonthAndResidentCustomedData(year,month,j.name,data)
-            var bufferStream = new stream.PassThrough();
-
-            bufferStream.end(new Buffer(sub));
-            let workbook = await wbSub.xlsx.read(bufferStream)
-            let wsSub =workbook.getWorksheet(1);
-            let wsGen = wbGeneral.addWorksheet(j.name,{pageSetup:wsSub.pageSetup,views:wsSub.views,properties:wsSub.properties})
-            wsGen.model = wsSub.model
-            wsGen.name = j.name
-            for(let masterName in wsSub._merges){
-                let dimensions =  wsSub._merges[masterName].model
-                let master = wsGen.getCell(dimensions.top, dimensions.left);
-                for (let i = dimensions.top; i <= dimensions.bottom; i++) {
-                    for (let j = dimensions.left; j <= dimensions.right; j++) {
-                        if ((i > dimensions.top) || (j > dimensions.left)) {
-                            wsGen.getCell(i, j).merge(master);
+            if (!mainResidents.filter(i=>j.name.indexOf(i)>-1).length){
+                others = others.concat(data)
+            }else{
+                let sub = await this.generateSheetByYearAndMonthAndResidentCustomedData(year,month,j.name,data)
+                var bufferStream = new stream.PassThrough();
+                bufferStream.end(new Buffer(sub));
+                let workbook = await wbSub.xlsx.read(bufferStream)
+                let wsSub =workbook.getWorksheet(1);
+                let wsGen = wbGeneral.addWorksheet(j.name,{pageSetup:wsSub.pageSetup,views:wsSub.views,properties:wsSub.properties})
+                wsGen.model = wsSub.model
+                wsGen.name = j.name
+                for(let masterName in wsSub._merges){
+                    let dimensions =  wsSub._merges[masterName].model
+                    let master = wsGen.getCell(dimensions.top, dimensions.left);
+                    for (let i = dimensions.top; i <= dimensions.bottom; i++) {
+                        for (let j = dimensions.left; j <= dimensions.right; j++) {
+                            if ((i > dimensions.top) || (j > dimensions.left)) {
+                                wsGen.getCell(i, j).merge(master);
+                            }
                         }
                     }
                 }
             }
-        
+        }
+        let othersSub = await this.generateSheetByYearAndMonthAndResidentCustomedData(year,month,'其它',others)
 
-
+        var bufferStream = new stream.PassThrough();
+        bufferStream.end(new Buffer(othersSub));
+        let wbSub = new XLSX.Workbook();        
+        let workbook = await wbSub.xlsx.read(bufferStream)
+        let wsSub =workbook.getWorksheet(1);
+        let wsGen = wbGeneral.addWorksheet('其它',{pageSetup:wsSub.pageSetup,views:wsSub.views,properties:wsSub.properties})
+        wsGen.model = wsSub.model
+        wsGen.name = '其它'
+        for(let masterName in wsSub._merges){
+            let dimensions =  wsSub._merges[masterName].model
+            let master = wsGen.getCell(dimensions.top, dimensions.left);
+            for (let i = dimensions.top; i <= dimensions.bottom; i++) {
+                for (let j = dimensions.left; j <= dimensions.right; j++) {
+                    if ((i > dimensions.top) || (j > dimensions.left)) {
+                        wsGen.getCell(i, j).merge(master);
+                    }
+                }
+            }
         }
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=Report.xlsx');
